@@ -1,0 +1,52 @@
+@page "/reports/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorWebAppReports.Models
+@inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Report</h2>
+    <hr />
+    @if (report is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Title</dt>
+            <dd class="col-sm-10">@report.Title</dd>
+            <dt class="col-sm-2">DueDate</dt>
+            <dd class="col-sm-10">@report.DueDate</dd>
+            <dt class="col-sm-2">Type</dt>
+            <dd class="col-sm-10">@report.Type</dd>
+            <dt class="col-sm-2">Priority</dt>
+            <dd class="col-sm-10">@report.Priority</dd>
+        </dl>
+        <div>
+            <a href="@($"/reports/edit?id={report.Id}")">Edit</a> |
+            <a href="@($"/reports")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Report? report;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        report = await context.Report.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (report is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+}
