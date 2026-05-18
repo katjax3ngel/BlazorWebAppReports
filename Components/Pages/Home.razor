@@ -10,6 +10,9 @@ Welcome to APTC 495.
 @{
     var greeting = "Welcome to our site!";
     var weekDay = DateTime.Now.DayOfWeek;
-    var greetingMessage = greeting + " Today is: " + weekDay;
+    DateTime currentDate = DateTime.Now;
+    var greetingMessage = greeting;
 }
-<p>The greeting is: @greetingMessage</p>
+
+<p>@greetingMessage</p>
+<p>Today is: @weekDay, @currentDate.ToShortDateString()</p>
