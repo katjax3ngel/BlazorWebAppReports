@@ -8,8 +8,11 @@ Welcome to APTC 495.
 
 <!-- Multi-statement block -->
 @{
-    var greeting = "Welcome to our site!";
+    var greeting = "Please pardon our appearance!";
     var weekDay = DateTime.Now.DayOfWeek;
-    var greetingMessage = greeting + " Today is: " + weekDay;
+    DateTime currentDate = DateTime.Now;
+    var greetingMessage = greeting;
 }
-<p>The greeting is: @greetingMessage</p>
+
+<p>@greetingMessage</p>
+<p>Today is: @weekDay, @currentDate.ToShortDateString()</p>

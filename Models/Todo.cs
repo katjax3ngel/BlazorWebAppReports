@@ -1,11 +1,10 @@
-﻿namespace BlazorWebAppReports.Models
+﻿
+namespace BlazorWebAppReports.Models
 {
-    namespace BlazorWebAppReports
-    {
         public class TodoItem
         {
+            public int Id { get; set; }
             public string? Title { get; set; }
             public bool IsDone { get; set; }
         }
-    }
 }

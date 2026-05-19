@@ -1,5 +1,8 @@
 ﻿@page "/Todo"
 @rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using BlazorWebAppReports.Models
+@inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
 
 <PageTitle>Todo</PageTitle>
 
@@ -9,8 +12,8 @@
     @foreach (var todo in todos)
     {
         <li>
-            <input type="checkbox" @bind="todo.IsDone" />
-            <input @bind="todo.Title" />
+            <input type="checkbox" @bind="todo.IsDone" @bind:after="() => UpdateTodo(todo)" />
+            <input @bind="todo.Title" @bind:after="() => UpdateTodo(todo)" />
         </li>
     }
 </ul>
@@ -18,16 +21,42 @@
 <input placeholder="Something todo" @bind="newTodo" />
 <button @onclick="AddTodo">Add todo</button>
 
-@code {
-    private List<TodoItem> todos = [];
+@code 
+{
+    private List<BlazorWebAppReports.Models.TodoItem> todos = new();
     private string? newTodo;
 
-    private void AddTodo()
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        todos = await context.TodoItems.ToListAsync();
+    }
+
+    private async Task AddTodo()
     {
         if (!string.IsNullOrWhiteSpace(newTodo))
         {
-            todos.Add(new TodoItem { Title = newTodo });
+            using var context = DbFactory.CreateDbContext();
+
+            var todo = new BlazorWebAppReports.Models.TodoItem
+            { 
+                Title = newTodo, 
+                IsDone = false 
+            };
+
+            context.TodoItems.Add(todo);
+            await context.SaveChangesAsync();
+
+            todos = await context.TodoItems.ToListAsync();
             newTodo = string.Empty;
         }
+    }
+
+    private async Task UpdateTodo(BlazorWebAppReports.Models.TodoItem todo)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        context.TodoItems.Update(todo);
+        await context.SaveChangesAsync();
     }
 }
