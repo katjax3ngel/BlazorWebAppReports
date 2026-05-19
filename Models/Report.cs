@@ -16,4 +16,6 @@ public class Report
     [DataType(DataType.Currency)]
     [Column(TypeName = "decimal(18, 2)")]
     public decimal Priority { get; set; }
+
+    public string? Description { get; set; }
 }

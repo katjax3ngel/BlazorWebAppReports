@@ -34,6 +34,11 @@
                 <label for="priority" class="form-label">Priority:</label> 
                 <InputNumber id="priority" @bind-Value="Report.Priority" class="form-control" /> 
                 <ValidationMessage For="() => Report.Priority" class="text-danger" /> 
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <InputTextArea id="description" @bind-Value="Report.Description" class="form-control" />
+                <ValidationMessage For="() => Report.Description" class="text-danger" />
             </div>        
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
