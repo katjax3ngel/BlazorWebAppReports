@@ -1,0 +1,38 @@
+@page "/archived-todo"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using BlazorWebAppReports.Models
+@inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Archived Tasks</PageTitle>
+
+<h1>Archived Tasks</h1>
+
+<a href="/Todo">
+    <button type="button">Back to Todo</button>
+</a>
+
+<ul>
+    @foreach (var todo in archivedTodos)
+    {
+        <li>
+            <textarea readonly style="width:300px; min-height:30px; white-space:pre-wrap;">
+@todo.Title
+            </textarea>
+
+            <br />
+
+            <small>Archived: @todo.ArchivedDate</small>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<ArchivedTodoItem> archivedTodos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        archivedTodos = await context.ArchivedTodoItems.ToListAsync();
+    }
+}

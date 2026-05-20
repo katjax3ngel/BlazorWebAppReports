@@ -1,0 +1,38 @@
+@page "/archived-reports"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using BlazorWebAppReports.Models
+@inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Archived Reports</PageTitle>
+
+<h1>Archived Reports</h1>
+
+<a href="/reports">
+    <button type="button">Back to Reports</button>
+</a>
+
+<ul>
+    @foreach (var report in archivedReports)
+    {
+        <li>
+            <strong>@report.Title</strong><br />
+            Due: @report.DueDate<br />
+            Type: @report.Type<br />
+            Priority: @report.Priority<br />
+            Description: @report.Description<br />
+            Archived: @report.ArchivedDate
+        </li>
+    }
+</ul>
+
+@code {
+    private List<ArchivedReport> archivedReports = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        archivedReports = await context.ArchivedReports.ToListAsync();
+    }
+}

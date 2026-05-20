@@ -8,12 +8,29 @@
 
 <h1>Todo (@todos.Count(todo => !todo.IsDone))</h1>
 
+<a href="/archived-todo">
+    <button type="button">Access Archived</button>
+</a>
+
+<a href="/deleted-todo">
+    <button type="button">Access Deleted</button>
+</a>
+
+<br />
+<br />
+
 <ul>
     @foreach (var todo in todos)
     {
         <li>
             <input type="checkbox" @bind="todo.IsDone" @bind:after="() => UpdateTodo(todo)" />
-            <input @bind="todo.Title" @bind:after="() => UpdateTodo(todo)" />
+            <textarea @bind="todo.Title" 
+                @bind:after="() => UpdateTodo(todo)"
+                style="width:300px; min-height:30px; white-space:pre-wrap; overflow-y:auto;">
+            </textarea>
+
+            <button type="button" @onclick="() => ArchiveTodo(todo)">Archive</button>
+            <button type="button" @onclick="() => DeleteTodo(todo)">Delete</button>
         </li>
     }
 </ul>
@@ -59,4 +76,43 @@
         context.TodoItems.Update(todo);
         await context.SaveChangesAsync();
     }
+
+    private async Task ArchiveTodo(BlazorWebAppReports.Models.TodoItem todo)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var archivedTodo = new BlazorWebAppReports.Models.ArchivedTodoItem
+        {
+            Title = todo.Title,
+            IsDone = todo.IsDone,
+            ArchivedDate = DateTime.Now
+        };
+
+        context.ArchivedTodoItems.Add(archivedTodo);
+        context.TodoItems.Remove(todo);
+
+        await context.SaveChangesAsync();
+
+        todos = await context.TodoItems.ToListAsync();
+    }
+
+    private async Task DeleteTodo(BlazorWebAppReports.Models.TodoItem todo)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var deletedTodo = new BlazorWebAppReports.Models.DeletedTodoItem
+        {
+            Title = todo.Title,
+            IsDone = todo.IsDone,
+            DeletedDate = DateTime.Now
+        };
+
+        context.DeletedTodoItems.Add(deletedTodo);
+        context.TodoItems.Remove(todo);
+
+        await context.SaveChangesAsync();
+
+        todos = await context.TodoItems.ToListAsync();
+    }
+
 }

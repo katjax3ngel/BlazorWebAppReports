@@ -1,0 +1,38 @@
+@page "/deleted-reports"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using BlazorWebAppReports.Models
+@inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Deleted Reports</PageTitle>
+
+<h1>Deleted Reports</h1>
+
+<a href="/reports">
+    <button type="button">Back to Reports</button>
+</a>
+
+<ul>
+    @foreach (var report in deletedReports)
+    {
+        <li>
+            <strong>@report.Title</strong><br />
+            Due: @report.DueDate<br />
+            Type: @report.Type<br />
+            Priority: @report.Priority<br />
+            Description: @report.Description<br />
+            Deleted: @report.DeletedDate
+        </li>
+    }
+</ul>
+
+@code {
+    private List<DeletedReport> deletedReports = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        deletedReports = await context.DeletedReports.ToListAsync();
+    }
+}

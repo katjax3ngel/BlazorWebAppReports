@@ -1,4 +1,5 @@
 @page "/reports"
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebAppReports.Models
@@ -15,6 +16,24 @@
     <a href="reports/create">Create New</a>
 </p>
 
+<a href="/archived-reports">
+    <button type="button">Access Archived</button>
+</a>
+
+<a href="/deleted-reports">
+    <button type="button">Access Deleted</button>
+</a>
+
+<br />
+<br />
+
+<QuickGrid Class="table" Items="context.Report">
+    <PropertyColumn Property="report => report.Id" />
+    <PropertyColumn Property="report => report.Title" />
+    <PropertyColumn Property="report => report.DueDate" />
+    <PropertyColumn Property="report => report.Type" />
+    <PropertyColumn Property="report => report.Priority" />
+    <PropertyColumn Property="report => report.Description" />
 <QuickGrid Class="table" Items="context.Report" Pagination="pagination">
     <PropertyColumn Property="report =>report.Id" Sortable="true" />
     <Paginator State="pagination" />
@@ -26,9 +45,12 @@
     <PropertyColumn Property="report => report.Description" Sortable="true" />
 
     <TemplateColumn Context="report">
-        <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
-        <a href="@($"reports/details?id={report.Id}")">Details</a> |
-        <a href="@($"reports/delete?id={report.Id}")">Delete</a>
+    <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
+    <a href="@($"reports/details?id={report.Id}")">Details</a> |
+
+    <button type="button" @onclick="() => ArchiveReport(report)">Archive</button>
+
+    <button type="button" @onclick="() => DeleteReport(report)">Delete</button>
     </TemplateColumn>
 </QuickGrid>
 
@@ -39,6 +61,47 @@
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+    }
+
+    private async Task ArchiveReport(Report report)
+    {
+        var archivedReport = new ArchivedReport
+        {
+            Title = report.Title,
+            DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
+            Type = report.Type,
+            Priority = report.Priority,
+            Description = report.Description,
+            ArchivedDate = DateTime.Now
+        };
+
+    context.ArchivedReports.Add(archivedReport);
+    context.Report.Remove(report);
+
+    await context.SaveChangesAsync();
+
+    NavigationManager.NavigateTo("/reports", forceLoad: true);
+    }
+
+    private async Task DeleteReport(Report report)
+    {
+        var deletedReport = new DeletedReport
+        {
+            Title = report.Title,
+            DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
+            Type = report.Type,
+            Priority = report.Priority,
+            Description = report.Description,
+            DeletedDate = DateTime.Now
+        };
+
+    context.DeletedReports.Add(deletedReport);
+    context.Report.Remove(report);
+
+    await context.SaveChangesAsync();
+
+    NavigationManager.NavigateTo("/reports", forceLoad: true);
+
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

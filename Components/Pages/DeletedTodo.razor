@@ -1,0 +1,38 @@
+@page "/deleted-todo"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using BlazorWebAppReports.Models
+@inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Deleted Tasks</PageTitle>
+
+<h1>Deleted Tasks</h1>
+
+<a href="/Todo">
+    <button type="button">Back to Todo</button>
+</a>
+
+<ul>
+    @foreach (var todo in deletedTodos)
+    {
+        <li>
+            <textarea readonly style="width:300px; min-height:30px; white-space:pre-wrap;">
+@todo.Title
+            </textarea>
+
+            <br />
+
+            <small>Deleted: @todo.DeletedDate</small>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<DeletedTodoItem> deletedTodos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        deletedTodos = await context.DeletedTodoItems.ToListAsync();
+    }
+}

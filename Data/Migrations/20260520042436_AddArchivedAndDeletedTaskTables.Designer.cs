@@ -4,6 +4,7 @@ using BlazorWebAppReports.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorWebAppReports.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260520042436_AddArchivedAndDeletedTaskTables")]
+    partial class AddArchivedAndDeletedTaskTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,7 +91,7 @@ namespace BlazorWebAppReports.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BlazorWebAppReports.Models.ArchivedReport", b =>
+            modelBuilder.Entity("BlazorWebAppReports.Models.ArchivedTaskItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,24 +102,15 @@ namespace BlazorWebAppReports.Migrations
                     b.Property<DateTime>("ArchivedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Priority")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
-                    b.ToTable("ArchivedReports");
+                    b.ToTable("ArchivedTaskItems");
                 });
 
             modelBuilder.Entity("BlazorWebAppReports.Models.ArchivedTodoItem", b =>
@@ -141,7 +135,7 @@ namespace BlazorWebAppReports.Migrations
                     b.ToTable("ArchivedTodoItems");
                 });
 
-            modelBuilder.Entity("BlazorWebAppReports.Models.DeletedReport", b =>
+            modelBuilder.Entity("BlazorWebAppReports.Models.DeletedTaskItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -152,24 +146,15 @@ namespace BlazorWebAppReports.Migrations
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Priority")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
-                    b.ToTable("DeletedReports");
+                    b.ToTable("DeletedTaskItems");
                 });
 
             modelBuilder.Entity("BlazorWebAppReports.Models.DeletedTodoItem", b =>
