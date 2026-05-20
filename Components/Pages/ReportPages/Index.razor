@@ -60,6 +60,7 @@
     {
         var archivedReport = new ArchivedReport
         {
+            Id = report.Id,
             Title = report.Title,
             DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
             Type = report.Type,
@@ -80,6 +81,7 @@
     {
         var deletedReport = new DeletedReport
         {
+            Id  = report.Id,
             Title = report.Title,
             DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
             Type = report.Type,

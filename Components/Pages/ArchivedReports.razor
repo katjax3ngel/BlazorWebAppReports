@@ -16,6 +16,7 @@
     @foreach (var report in archivedReports)
     {
         <li>
+            Ticket ID: <strong>@report.Id</strong><br />
             <strong>@report.Title</strong><br />
             Due: @report.DueDate<br />
             Type: @report.Type<br />
