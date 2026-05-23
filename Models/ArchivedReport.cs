@@ -4,6 +4,8 @@ namespace BlazorWebAppReports.Models
     {
         public int Id { get; set; }
 
+        public int OriginalReportId { get; set; }
+
         public string? Title { get; set; }
 
         public DateTime DueDate { get; set; }
@@ -15,5 +17,7 @@ namespace BlazorWebAppReports.Models
         public string? Description { get; set; }
 
         public DateTime ArchivedDate { get; set; }
+
+        public string? AssignedTo { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using BlazorWebAppReports.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorWebAppReports.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523011333_AddOriginalReportIdToArchivedReport")]
+    partial class AddOriginalReportIdToArchivedReport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,9 +102,6 @@ namespace BlazorWebAppReports.Migrations
                     b.Property<DateTime>("ArchivedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -155,9 +155,6 @@ namespace BlazorWebAppReports.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("datetime2");
 
@@ -166,9 +163,6 @@ namespace BlazorWebAppReports.Migrations
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("OriginalReportId")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("Priority")
                         .HasColumnType("decimal(18,2)");
@@ -213,9 +207,6 @@ namespace BlazorWebAppReports.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssignedTo")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");

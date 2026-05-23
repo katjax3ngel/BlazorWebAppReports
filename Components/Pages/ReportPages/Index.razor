@@ -28,24 +28,24 @@
 <br />
 
 <QuickGrid Class="table" Items="context.Report" Pagination="pagination">
-    <PropertyColumn Property="report =>report.Id" Sortable="true" />
-    <Paginator State="pagination" />
-
-    <PropertyColumn Property="report => report.Title"  Sortable="true" />
+    <PropertyColumn Property="report => report.Id" Sortable="true" />
+    <PropertyColumn Property="report => report.Title" Sortable="true" />
     <PropertyColumn Property="report => report.DueDate" Sortable="true" />
     <PropertyColumn Property="report => report.Type" Sortable="true" />
     <PropertyColumn Property="report => report.Priority" Sortable="true" />
+    <PropertyColumn Property="report => report.AssignedTo" Title="Assigned To" Sortable="true" />
     <PropertyColumn Property="report => report.Description" Sortable="true" />
 
     <TemplateColumn Context="report">
-    <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
-    <a href="@($"reports/details?id={report.Id}")">Details</a> |
+        <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
+        <a href="@($"reports/details?id={report.Id}")">Details</a> |
 
-    <button type="button" @onclick="() => ArchiveReport(report)">Archive</button>
-
-    <button type="button" @onclick="() => DeleteReport(report)">Delete</button>
+        <button type="button" @onclick="() => ArchiveReport(report)">Archive</button>
+        <button type="button" @onclick="() => DeleteReport(report)">Delete</button>
     </TemplateColumn>
 </QuickGrid>
+
+<Paginator State="pagination" />
 
 @code {
     private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
@@ -60,12 +60,14 @@
     {
         var archivedReport = new ArchivedReport
         {
+            OriginalReportId = report.Id,
             Title = report.Title,
             DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
             Type = report.Type,
             Priority = report.Priority,
             Description = report.Description,
-            ArchivedDate = DateTime.Now
+            ArchivedDate = DateTime.Now,
+            AssignedTo = report.AssignedTo
         };
 
     context.ArchivedReports.Add(archivedReport);
@@ -80,12 +82,14 @@
     {
         var deletedReport = new DeletedReport
         {
+            OriginalReportId = report.Id,
             Title = report.Title,
             DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
             Type = report.Type,
             Priority = report.Priority,
             Description = report.Description,
-            DeletedDate = DateTime.Now
+            DeletedDate = DateTime.Now,
+            AssignedTo = report.AssignedTo
         };
 
     context.DeletedReports.Add(deletedReport);
