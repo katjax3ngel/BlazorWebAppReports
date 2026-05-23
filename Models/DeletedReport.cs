@@ -3,7 +3,6 @@ namespace BlazorWebAppReports.Models
     public class DeletedReport
     {
         public int Id { get; set; }
-
         public int OriginalReportId { get; set; }
 
         public string? Title { get; set; }

@@ -40,8 +40,8 @@
         <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
         <a href="@($"reports/details?id={report.Id}")">Details</a> |
 
-        <button type="button" @onclick="() => ArchiveReport(report)">Archive</button>
-        <button type="button" @onclick="() => DeleteReport(report)">Delete</button>
+        <button type="button" @onclick="() => ArchiveReport(report.Id)">Archive</button>
+        <button type="button" @onclick="() => DeleteReport(report.Id)">Delete</button>
     </TemplateColumn>
 </QuickGrid>
 
@@ -56,46 +56,63 @@
         context = DbFactory.CreateDbContext();
     }
 
-    private async Task ArchiveReport(Report report)
+    private async Task ArchiveReport(int id)
     {
-        var archivedReport = new ArchivedReport
+        using var context = DbFactory.CreateDbContext();
+
+        var report = await context.Report.FindAsync(id);
+
+        if (report is not null)
         {
-            Id = report.Id,
-            Title = report.Title,
-            DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
-            Type = report.Type,
-            Priority = report.Priority,
-            Description = report.Description,
-            ArchivedDate = DateTime.Now,
-            AssignedTo = report.AssignedTo
-        };
+            var archivedReport = new ArchivedReport
+            {
+                OriginalReportId = report.Id,
+                Title = report.Title,
+                DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
+                Type = report.Type,
+                Priority = report.Priority,
+                Description = report.Description,
+                ArchivedDate = DateTime.Now,
+                AssignedTo = report.AssignedTo
+            };
+    
 
-    context.ArchivedReports.Add(archivedReport);
-    context.Report.Remove(report);
+            context.ArchivedReports.Add(archivedReport);
+            context.Report.Remove(report);
 
-    await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
 
-    NavigationManager.NavigateTo("/reports", forceLoad: true);
+        NavigationManager.NavigateTo("/reports", forceLoad: true);
+        
     }
 
-    private async Task DeleteReport(Report report)
+    private async Task DeleteReport(int id)
     {
-        var deletedReport = new DeletedReport
+        using var context = DbFactory.CreateDbContext();
+
+        var report = await context.Report.FindAsync(id);
+
+        if (report is not null)
         {
-            Id  = report.Id,
-            Title = report.Title,
-            DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
-            Type = report.Type,
-            Priority = report.Priority,
-            Description = report.Description,
-            DeletedDate = DateTime.Now,
-            AssignedTo = report.AssignedTo
-        };
 
-    context.DeletedReports.Add(deletedReport);
-    context.Report.Remove(report);
+            var deletedReport = new DeletedReport
+            {
+                OriginalReportId = report.Id,
+                Title = report.Title,
+                DueDate = report.DueDate.ToDateTime(TimeOnly.MinValue),
+                Type = report.Type,
+                Priority = report.Priority,
+                Description = report.Description,
+                DeletedDate = DateTime.Now,
+                AssignedTo = report.AssignedTo
+            };
 
-    await context.SaveChangesAsync();
+            context.DeletedReports.Add(deletedReport);
+            context.Report.Remove(report);
+
+            await context.SaveChangesAsync();
+        }
 
     NavigationManager.NavigateTo("/reports", forceLoad: true);
 
