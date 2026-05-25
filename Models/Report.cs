@@ -17,7 +17,9 @@ public class Report
     [Column(TypeName = "decimal(18, 2)")]
     public decimal Priority { get; set; }
 
-    public string? Description { get; set; }
-
     public string? AssignedTo { get; set; }
+
+    public string? Status { get; set; }
+
+    public string? Description { get; set; }
 }

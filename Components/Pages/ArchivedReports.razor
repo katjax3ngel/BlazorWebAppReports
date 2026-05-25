@@ -1,19 +1,33 @@
 @page "/archived-reports"
 @rendermode InteractiveServer
+@using System.Text
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebAppReports.Models
 @inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+@inject IJSRuntime JS
 
 <PageTitle>Archived Reports</PageTitle>
 
 <h1>Archived Reports</h1>
 
+<input class="form-control"
+       placeholder="Search archived reports..."
+       @bind="searchText"
+       @bind:event="oninput" />
+
+<br />
+
 <a href="/reports">
     <button type="button">Back to Reports</button>
 </a>
 
+<button type="button" @onclick="ExportCsv">Export CSV</button>
+
+<br />
+<br />
+
 <ul>
-    @foreach (var report in archivedReports)
+    @foreach (var report in FilteredArchivedReports)
     {
         <li>
             Ticket ID: <strong>@report.Id</strong><br />
@@ -38,4 +52,61 @@
 
         archivedReports = await context.ArchivedReports.ToListAsync();
     }
+
+    private async Task ExportCsv()
+    {
+        var csv = new StringBuilder();
+
+        csv.AppendLine("Id,Title,OriginalReportId,DueDate,Type,Priority,Description,ArchivedDate,AssignedTo");
+
+        foreach (var report in archivedReports)
+        {
+            csv.AppendLine(
+                $"{report.Id}," +
+                $"\"{report.Title}\"," +
+                $"{report.OriginalReportId}," +
+                $"{report.DueDate}," +
+                $"\"{report.Type}\"," +
+                $"{report.Priority}," +
+                $"\"{report.Description}\"," +
+                $"{report.ArchivedDate}," +
+                $"\"{report.AssignedTo}\""
+            );
+        }
+
+    var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+    var base64 = Convert.ToBase64String(bytes);
+
+    await JS.InvokeVoidAsync(
+        "downloadFile",
+        "archived-reports.csv",
+        "text/csv",
+        base64
+    );
+    }
+
+    private string searchText = "";
+
+    private IEnumerable<ArchivedReport> FilteredArchivedReports =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? archivedReports
+            : archivedReports.Where(report =>
+                (report.Title != null && report.Title.ToLower().Contains(searchText.ToLower())) ||
+                (report.Type != null && report.Type.ToLower().Contains(searchText.ToLower())) ||
+                (report.AssignedTo != null && report.AssignedTo.ToLower().Contains(searchText.ToLower())) ||
+                (report.Description != null && report.Description.ToLower().Contains(searchText.ToLower())));
+
 }
+
+<script>
+    function downloadFile(filename, contentType, base64Data) {
+        const link = document.createElement('a');
+
+        link.download = filename;
+        link.href = `data:${contentType};base64,${base64Data}`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
