@@ -17,45 +17,77 @@
 else
 {
     <div class="row">
-        <div class="col-md-4">
-            <EditForm method="post" Model="Report" OnValidSubmit="UpdateReport" FormName="edit" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Report.Id" value="@Report.Id" />
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title:</label>
-                    <InputText id="title" @bind-Value="Report.Title" class="form-control" />
-                    <ValidationMessage For="() => Report.Title" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="duedate" class="form-label">DueDate:</label>
-                    <InputDate id="duedate" @bind-Value="Report.DueDate" class="form-control" />
-                    <ValidationMessage For="() => Report.DueDate" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="type" class="form-label">Type:</label>
-                    <InputText id="type" @bind-Value="Report.Type" class="form-control" />
-                    <ValidationMessage For="() => Report.Type" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="priority" class="form-label">Priority:</label>
-                    <InputNumber id="priority" @bind-Value="Report.Priority" class="form-control" />
-                    <ValidationMessage For="() => Report.Priority" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description:</label>
-                    <InputTextArea id="description" @bind-Value="Report.Description" class="form-control" />
-                    <ValidationMessage For="() => Report.Description" class="text-danger" />
-                </div>   
-                <button type="submit" class="btn btn-primary">Save</button>
-            </EditForm>
-        </div>
+    <div class="col-md-4">
+        <EditForm Model="Report" OnValidSubmit="UpdateReport" FormName="edit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label> 
+                <InputText id="title" @bind-Value="Report.Title" class="form-control" /> 
+                <ValidationMessage For="() => Report.Title" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="duedate" class="form-label">DueDate:</label> 
+                <InputDate id="duedate" @bind-Value="Report.DueDate" class="form-control" /> 
+                <ValidationMessage For="() => Report.DueDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+
+            <InputSelect class="form-control" @bind-Value="Report.Type">
+                <option value="">-- Select Type --</option>
+                <option value="Bug">Bug</option>
+                <option value="Feature">Feature</option>
+                <option value="Nice to Have">Nice to Have</option>
+                <option value="Other">Other</option>
+            </InputSelect>
+            </div>        
+            <div class="mb-3">
+                <label for="priority" class="form-label">Priority:</label> 
+                <InputNumber id="priority" @bind-Value="Report.Priority" class="form-control" /> 
+                <ValidationMessage For="() => Report.Priority" class="text-danger" /> 
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Assigned To:</label>
+
+            <InputSelect class="form-control" @bind-Value="Report.AssignedTo">
+                <option value="">-- Select Team Member --</option>
+                <option value="Christina Chamberlain">Christina Chamberlain</option>
+                <option value="Kyle Tuchon">Kyle Tuchon</option>
+                <option value="Braden Cantu">Braden Cantu</option>
+                <option value="Danielle McCartney">Danielle McCartney</option>
+                <option value="Benjamin Sherill">Benjamin Sherill</option>
+            </InputSelect>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Status:</label>
+
+            <InputSelect class="form-control" @bind-Value="Report.Status">
+                <option value="">-- Select Status --</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Pending">Pending</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+            </InputSelect>
+
+            <ValidationMessage For="() => Report.Status" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <InputTextArea id="description" @bind-Value="Report.Description" class="form-control" />
+                <ValidationMessage For="() => Report.Description" class="text-danger" />
+            </div>        
+            <button type="submit" class="btn btn-primary">Save</button>
+        </EditForm>
     </div>
-}
+    </div>
+    }
 
 <div>
     <a href="/reports">Back to List</a>
 </div>
+    
 
 @code {
     [SupplyParameterFromQuery]

@@ -4,13 +4,21 @@
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebAppReports.Models
 @using BlazorWebAppReports.Data
-@implements IAsyncDisposable
+@using System.Text
+@inject IJSRuntime JS
 @inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Index</PageTitle>
 
 <h1>Tickets</h1>
+
+<input class="form-control"
+       placeholder="Search tickets..."
+       @bind="searchText"
+       @bind:event="oninput" />
+
+<br />
 
 <p>
     <a href="reports/create">Create New</a>
@@ -27,18 +35,29 @@
 <br />
 <br />
 
-<QuickGrid Class="table" Items="context.Report" Pagination="pagination">
+<button type="button" @onclick="ExportCsv">Export CSV</button>
+
+<br />
+<br />
+
+<QuickGrid Class="table" Items="FilteredReports.AsQueryable()" Pagination="pagination">
     <PropertyColumn Property="report => report.Id" Sortable="true" />
     <PropertyColumn Property="report => report.Title" Sortable="true" />
     <PropertyColumn Property="report => report.DueDate" Sortable="true" />
     <PropertyColumn Property="report => report.Type" Sortable="true" />
     <PropertyColumn Property="report => report.Priority" Sortable="true" />
     <PropertyColumn Property="report => report.AssignedTo" Title="Assigned To" Sortable="true" />
+    <PropertyColumn Property="report => report.Status" Sortable="true" />
     <PropertyColumn Property="report => report.Description" Sortable="true" />
 
     <TemplateColumn Context="report">
-        <a href="@($"reports/edit?id={report.Id}")">Edit</a> |
-        <a href="@($"reports/details?id={report.Id}")">Details</a> |
+        <a href="@($"reports/edit?id={report.Id}")">
+            <button type="button">Edit</button>
+        </a>
+
+        <a href="@($"reports/details?id={report.Id}")">
+            <button type="button">Details</button>
+        </a>
 
         <button type="button" @onclick="() => ArchiveReport(report.Id)">Archive</button>
         <button type="button" @onclick="() => DeleteReport(report.Id)">Delete</button>
@@ -49,11 +68,12 @@
 
 @code {
     private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
-    private ApplicationDbContext context = default!;
+    private List<Report> reports = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        context = DbFactory.CreateDbContext();
+        using var context = DbFactory.CreateDbContext();
+        reports = await context.Report.ToListAsync();
     }
 
     private async Task ArchiveReport(int id)
@@ -118,5 +138,64 @@
 
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    private async Task ExportCsv()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var exportReports = await context.Report.ToListAsync();
+
+        var csv = new StringBuilder();
+
+        csv.AppendLine("Id,Title,DueDate,Type,Priority,AssignedTo,Status,Description");
+
+        foreach (var report in exportReports)
+        {
+            csv.AppendLine(
+                $"{report.Id}," +
+                $"\"{report.Title}\"," +
+                $"{report.DueDate}," +
+                $"\"{report.Type}\"," +
+                $"{report.Priority}," +
+                $"\"{report.AssignedTo}\"," +
+                $"\"{report.Status}\"," +
+                $"\"{report.Description}\""
+            );
+        }
+
+    var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+    var base64 = Convert.ToBase64String(bytes);
+
+    await JS.InvokeVoidAsync(
+        "downloadFile",
+        "reports.csv",
+        "text/csv",
+        base64
+    );
+    }
+
+    private string searchText = "";
+
+    private IEnumerable<Report> FilteredReports =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? reports
+            : reports.Where(report =>
+                (report.Title ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Type ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.AssignedTo ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Status ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Description ?? "").ToLower().Contains(searchText.ToLower()));
+
 }
+
+<script>
+    function downloadFile(filename, contentType, base64Data) {
+        const link = document.createElement('a');
+
+        link.download = filename;
+        link.href = `data:${contentType};base64,${base64Data}`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
