@@ -1,4 +1,5 @@
 @page "/reports/create"
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebAppReports.Models
 @inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
@@ -10,89 +11,96 @@
 
 <h2>Report</h2>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
-        <EditForm Model="Report" OnValidSubmit="AddReport" FormName="create">
+        <EditForm Model="NewReport" OnValidSubmit="AddReport">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <label for="title" class="form-label">Title:</label> 
-                <InputText id="title" @bind-Value="Report.Title" class="form-control" /> 
-                <ValidationMessage For="() => Report.Title" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="duedate" class="form-label">DueDate:</label> 
-                <InputDate id="duedate" @bind-Value="Report.DueDate" class="form-control" /> 
-                <ValidationMessage For="() => Report.DueDate" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label class="form-label">Type</label>
+            <ValidationSummary class="text-danger" role="alert" />
 
-            <InputSelect class="form-control" @bind-Value="Report.Type">
-                <option value="">-- Select Type --</option>
-                <option value="Bug">Bug</option>
-                <option value="Feature">Feature</option>
-                <option value="Nice to Have">Nice to Have</option>
-                <option value="Other">Other</option>
-            </InputSelect>
-            </div>        
             <div class="mb-3">
-                <label for="priority" class="form-label">Priority:</label> 
-                <InputNumber id="priority" @bind-Value="Report.Priority" class="form-control" /> 
-                <ValidationMessage For="() => Report.Priority" class="text-danger" /> 
+                <label for="title" class="form-label">Title:</label>
+                <InputText id="title" @bind-Value="NewReport.Title" class="form-control" />
+                <ValidationMessage For="() => NewReport.Title" class="text-danger" />
             </div>
+
             <div class="mb-3">
-                <label class="form-label">Assigned To:</label>
-
-            <InputSelect class="form-control" @bind-Value="Report.AssignedTo">
-                <option value="">-- Select Team Member --</option>
-                <option value="Christina Chamberlain">Christina Chamberlain</option>
-                <option value="Kyle Tuchon">Kyle Tuchon</option>
-                <option value="Braden Cantu">Braden Cantu</option>
-                <option value="Danielle McCartney">Danielle McCartney</option>
-                <option value="Benjamin Sherill">Benjamin Sherill</option>
-            </InputSelect>
+                <label for="duedate" class="form-label">Due Date:</label>
+                <InputDate id="duedate" @bind-Value="NewReport.DueDate" class="form-control" />
+                <ValidationMessage For="() => NewReport.DueDate" class="text-danger" />
             </div>
+
             <div class="mb-3">
-                <label class="form-label">Status:</label>
-
-            <InputSelect class="form-control" @bind-Value="Report.Status">
-                <option value="">-- Select Status --</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Pending">Pending</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
-            </InputSelect>
-
-            <ValidationMessage For="() => Report.Status" class="text-danger" />
+                <label for="type" class="form-label">Type:</label>
+                <InputSelect id="type" class="form-control" @bind-Value="NewReport.Type">
+                    <option value="">-- Select Type --</option>
+                    <option value="Bug">Bug</option>
+                    <option value="Feature">Feature</option>
+                    <option value="Nice to Have">Nice to Have</option>
+                    <option value="Other">Other</option>
+                </InputSelect>
+                <ValidationMessage For="() => NewReport.Type" class="text-danger" />
             </div>
+
+            <div class="mb-3">
+                <label for="priority" class="form-label">Priority:</label>
+                <InputNumber id="priority" @bind-Value="NewReport.Priority" class="form-control" />
+                <ValidationMessage For="() => NewReport.Priority" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="assignedTo" class="form-label">Assigned To:</label>
+                <InputSelect id="assignedTo" class="form-control" @bind-Value="NewReport.AssignedTo">
+                    <option value="">-- Select Team Member --</option>
+                    <option value="Christina Chamberlain">Christina Chamberlain</option>
+                    <option value="Kyle Tuchon">Kyle Tuchon</option>
+                    <option value="Braden Cantu">Braden Cantu</option>
+                    <option value="Danielle McCartney">Danielle McCartney</option>
+                    <option value="Benjamin Sherill">Benjamin Sherill</option>
+                </InputSelect>
+                <ValidationMessage For="() => NewReport.AssignedTo" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Status:</label>
+                <InputSelect id="status" class="form-control" @bind-Value="NewReport.Status">
+                    <option value="">-- Select Status --</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                </InputSelect>
+                <ValidationMessage For="() => NewReport.Status" class="text-danger" />
+            </div>
+
             <div class="mb-3">
                 <label for="description" class="form-label">Description:</label>
-                <InputTextArea id="description" @bind-Value="Report.Description" class="form-control" />
-                <ValidationMessage For="() => Report.Description" class="text-danger" />
-            </div>        
+                <InputTextArea id="description" @bind-Value="NewReport.Description" class="form-control" />
+                <ValidationMessage For="() => NewReport.Description" class="text-danger" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
+            <a href="/reports" class="btn btn-secondary ms-2">Cancel</a>
         </EditForm>
     </div>
 </div>
 
-<div>
+<div class="mt-3">
     <a href="/reports">Back to List</a>
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private Report Report { get; set; } = new();
+    private Report NewReport { get; set; } = new();
 
-    protected override void OnInitialized() => Report ??= new();
-
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddReport()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Report.Add(Report);
+
+        context.Report.Add(NewReport);
+
         await context.SaveChangesAsync();
+
         NavigationManager.NavigateTo("/reports");
     }
 }

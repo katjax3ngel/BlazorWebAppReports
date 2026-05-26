@@ -13,10 +13,7 @@
 
 <h1>Tickets</h1>
 
-<input class="form-control"
-       placeholder="Search tickets..."
-       @bind="searchText"
-       @bind:event="oninput" />
+<input class="form-control" placeholder="Search tickets..." @bind="searchText" @bind:event="oninput" />
 
 <br />
 
@@ -69,6 +66,7 @@
 @code {
     private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
     private List<Report> reports = new();
+    private string searchText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,9 +91,9 @@
                 Priority = report.Priority,
                 Description = report.Description,
                 ArchivedDate = DateTime.Now,
-                AssignedTo = report.AssignedTo
+                AssignedTo = report.AssignedTo,
+                Status = report.Status
             };
-    
 
             context.ArchivedReports.Add(archivedReport);
             context.Report.Remove(report);
@@ -104,7 +102,6 @@
         }
 
         NavigationManager.NavigateTo("/reports", forceLoad: true);
-        
     }
 
     private async Task DeleteReport(int id)
@@ -115,7 +112,6 @@
 
         if (report is not null)
         {
-
             var deletedReport = new DeletedReport
             {
                 OriginalReportId = report.Id,
@@ -125,7 +121,8 @@
                 Priority = report.Priority,
                 Description = report.Description,
                 DeletedDate = DateTime.Now,
-                AssignedTo = report.AssignedTo
+                AssignedTo = report.AssignedTo,
+                Status = report.Status
             };
 
             context.DeletedReports.Add(deletedReport);
@@ -134,8 +131,7 @@
             await context.SaveChangesAsync();
         }
 
-    NavigationManager.NavigateTo("/reports", forceLoad: true);
-
+        NavigationManager.NavigateTo("/reports", forceLoad: true);
     }
 
     private async Task ExportCsv()
@@ -162,18 +158,16 @@
             );
         }
 
-    var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-    var base64 = Convert.ToBase64String(bytes);
+        var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+        var base64 = Convert.ToBase64String(bytes);
 
-    await JS.InvokeVoidAsync(
-        "downloadFile",
-        "reports.csv",
-        "text/csv",
-        base64
-    );
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            "reports.csv",
+            "text/csv",
+            base64
+        );
     }
-
-    private string searchText = "";
 
     private IEnumerable<Report> FilteredReports =>
         string.IsNullOrWhiteSpace(searchText)
@@ -184,7 +178,6 @@
                 (report.AssignedTo ?? "").ToLower().Contains(searchText.ToLower()) ||
                 (report.Status ?? "").ToLower().Contains(searchText.ToLower()) ||
                 (report.Description ?? "").ToLower().Contains(searchText.ToLower()));
-
 }
 
 <script>

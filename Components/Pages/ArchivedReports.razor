@@ -10,10 +10,7 @@
 
 <h1>Archived Reports</h1>
 
-<input class="form-control"
-       placeholder="Search archived reports..."
-       @bind="searchText"
-       @bind:event="oninput" />
+<input class="form-control" placeholder="Search archived reports..." @bind="searchText" @bind:event="oninput" />
 
 <br />
 
@@ -31,20 +28,34 @@
     {
         <li>
             Ticket ID: <strong>@report.Id</strong><br />
+
             <strong>@report.Title</strong><br />
+
             Original Report ID: @report.OriginalReportId<br />
+
             Due: @report.DueDate<br />
+
             Type: @report.Type<br />
+
             Priority: @report.Priority<br />
+
+            Assigned To: @report.AssignedTo<br />
+
+            Status: @report.Status<br />
+
             Description: @report.Description<br />
-            Archived: @report.ArchivedDate<br />
-            Assigned To: @report.AssignedTo
+
+            Archived: @report.ArchivedDate
         </li>
+
+        <br />
     }
 </ul>
 
 @code {
     private List<ArchivedReport> archivedReports = new();
+
+    private string searchText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,7 +68,9 @@
     {
         var csv = new StringBuilder();
 
-        csv.AppendLine("Id,Title,OriginalReportId,DueDate,Type,Priority,Description,ArchivedDate,AssignedTo");
+        csv.AppendLine(
+            "Id,Title,OriginalReportId,DueDate,Type,Priority,AssignedTo,Status,Description,ArchivedDate"
+        );
 
         foreach (var report in archivedReports)
         {
@@ -68,45 +81,49 @@
                 $"{report.DueDate}," +
                 $"\"{report.Type}\"," +
                 $"{report.Priority}," +
+                $"\"{report.AssignedTo}\"," +
+                $"\"{report.Status}\"," +
                 $"\"{report.Description}\"," +
-                $"{report.ArchivedDate}," +
-                $"\"{report.AssignedTo}\""
+                $"{report.ArchivedDate}"
             );
         }
 
-    var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-    var base64 = Convert.ToBase64String(bytes);
+        var bytes = Encoding.UTF8.GetBytes(csv.ToString());
 
-    await JS.InvokeVoidAsync(
-        "downloadFile",
-        "archived-reports.csv",
-        "text/csv",
-        base64
-    );
+        var base64 = Convert.ToBase64String(bytes);
+
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            "archived-reports.csv",
+            "text/csv",
+            base64
+        );
     }
-
-    private string searchText = "";
 
     private IEnumerable<ArchivedReport> FilteredArchivedReports =>
         string.IsNullOrWhiteSpace(searchText)
             ? archivedReports
             : archivedReports.Where(report =>
-                (report.Title != null && report.Title.ToLower().Contains(searchText.ToLower())) ||
-                (report.Type != null && report.Type.ToLower().Contains(searchText.ToLower())) ||
-                (report.AssignedTo != null && report.AssignedTo.ToLower().Contains(searchText.ToLower())) ||
-                (report.Description != null && report.Description.ToLower().Contains(searchText.ToLower())));
-
+                (report.Title ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Type ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.AssignedTo ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Status ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Description ?? "").ToLower().Contains(searchText.ToLower()));
 }
 
 <script>
     function downloadFile(filename, contentType, base64Data) {
+
         const link = document.createElement('a');
 
         link.download = filename;
+
         link.href = `data:${contentType};base64,${base64Data}`;
 
         document.body.appendChild(link);
+
         link.click();
+
         document.body.removeChild(link);
     }
 </script>

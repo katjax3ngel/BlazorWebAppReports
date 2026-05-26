@@ -1,36 +1,63 @@
 @page "/deleted-reports"
 @rendermode InteractiveServer
+@using System.Text
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebAppReports.Models
 @inject IDbContextFactory<BlazorWebAppReports.Data.ApplicationDbContext> DbFactory
+@inject IJSRuntime JS
 
 <PageTitle>Deleted Reports</PageTitle>
 
 <h1>Deleted Reports</h1>
 
+<input class="form-control" placeholder="Search deleted reports..." @bind="searchText" @bind:event="oninput" />
+
+<br />
+
 <a href="/reports">
     <button type="button">Back to Reports</button>
 </a>
 
+<button type="button" @onclick="ExportCsv">
+    Export CSV
+</button>
+
+<br />
+<br />
+
 <ul>
-    @foreach (var report in deletedReports)
+    @foreach (var report in FilteredDeletedReports)
     {
         <li>
             Ticket ID: <strong>@report.Id</strong><br />
+
             <strong>@report.Title</strong><br />
+
             Original Report ID: @report.OriginalReportId<br />
+
             Due: @report.DueDate<br />
+
             Type: @report.Type<br />
+
             Priority: @report.Priority<br />
+
+            Assigned To: @report.AssignedTo<br />
+
+            Status: @report.Status<br />
+
             Description: @report.Description<br />
-            Deleted: @report.DeletedDate<br />
-            Assigned To: @report.AssignedTo
+
+            Deleted: @report.DeletedDate
         </li>
+
+        <br />
     }
 </ul>
 
 @code {
     private List<DeletedReport> deletedReports = new();
+
+    private string searchText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,4 +65,67 @@
 
         deletedReports = await context.DeletedReports.ToListAsync();
     }
+
+    private async Task ExportCsv()
+    {
+        var csv = new StringBuilder();
+
+        csv.AppendLine(
+            "Id,Title,OriginalReportId,DueDate,Type,Priority,AssignedTo,Status,Description,DeletedDate"
+        );
+
+        foreach (var report in deletedReports)
+        {
+            csv.AppendLine(
+                $"{report.Id}," +
+                $"\"{report.Title}\"," +
+                $"{report.OriginalReportId}," +
+                $"{report.DueDate}," +
+                $"\"{report.Type}\"," +
+                $"{report.Priority}," +
+                $"\"{report.AssignedTo}\"," +
+                $"\"{report.Status}\"," +
+                $"\"{report.Description}\"," +
+                $"{report.DeletedDate}"
+            );
+        }
+
+        var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+
+        var base64 = Convert.ToBase64String(bytes);
+
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            "deleted-reports.csv",
+            "text/csv",
+            base64
+        );
+    }
+
+    private IEnumerable<DeletedReport> FilteredDeletedReports =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? deletedReports
+            : deletedReports.Where(report =>
+                (report.Title ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Type ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.AssignedTo ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Status ?? "").ToLower().Contains(searchText.ToLower()) ||
+                (report.Description ?? "").ToLower().Contains(searchText.ToLower()));
 }
+
+<script>
+    function downloadFile(filename, contentType, base64Data) {
+
+        const link = document.createElement('a');
+
+        link.download = filename;
+
+        link.href = `data:${contentType};base64,${base64Data}`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+    }
+</script>
